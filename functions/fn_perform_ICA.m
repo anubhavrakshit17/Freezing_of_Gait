@@ -1,4 +1,4 @@
-function EEG_ICA = fn_perform_ICA(filename)
+function [icaweights,icasphere,icaact] = fn_perform_ICA(filename)
 % This function performs ICA on an EEG signal stored in a .mat file using the pop_runica() function from EEGlab.
 %
 % Inputs:
@@ -19,15 +19,26 @@ if ~exist(ica_folder, 'dir')
     mkdir(ica_folder);
 end
 
-% Define the ICA file name
-ica_filename = [char(filename), '_ICA.mat'];
+% Define the ICA file names
+
+icaweights_filename = [char(filename), '_icaweights.mat'];
+icasphere_filename= [char(filename), '_icasphere.mat'];
+icaact_filename = [char(filename), '_icaact.mat'];
 
 % Check if the file already exists
-if exist(fullfile(ica_folder, ica_filename), 'file')
-    disp(['The ICA file "', ica_filename, '" already exists in "', ica_folder, '".']);
+if exist(fullfile(ica_folder, icaweights_filename), 'file')  && ...
+    exist (fullfile(ica_folder, icasphere_filename), 'file')  && ...
+    exist(fullfile(ica_folder, icaact_filename), 'file')
+    disp(['The ICA files "', icaact_filename, '" already exists in "', ica_folder, '".']);
+    %eeglab;
+icaweights = load(fullfile(ica_folder,icaweights_filename),'-mat');
+icasphere =    load(fullfile(icasphere_filename),'-mat');
+icaact=   load(fullfile(ica_folder,icaact_filename),'-mat');
+
+
 else
     % Create a dummy EEG structure for the input signal
-    eeglab;
+    eeglab
     EEG = eeg_emptyset;
     EEG.data = EEG_signal;
     
@@ -41,10 +52,15 @@ else
 
     % Run ICA using EEGlab function
     EEG = pop_runica(EEG, 'icatype', 'runica', 'extended', 1, 'interrupt', 'on', 'pca', num_components);
-
+    icaweights = EEG.icaweights;
+    icasphere = EEG.icasphere;
     % Extract ICA-transformed EEG data
-    EEG_ICA = EEG.icaweights * EEG.icasphere * EEG.data;
+    icaact = EEG.icaweights * EEG.icasphere * EEG.data;
     
-    save(fullfile(ica_folder, ica_filename), 'EEG_ICA');
-    disp(['The ICA file "', ica_filename, '" has been saved to "', ica_folder, '".']);
+    save(fullfile(ica_folder, icaweights_filename), 'icaweights');
+    save(fullfile(ica_folder, icasphere_filename), 'icasphere');
+    save(fullfile(ica_folder, icaact_filename), 'icaact');
+    disp(['The icaact file "', icaweights_filename, '" has been saved to "', ica_folder, '".']);
+    disp(['The icaact file "', icasphere_filename, '" has been saved to "', ica_folder, '".']);
+    disp(['The icaact file "', icaact_filename, '" has been saved to "', ica_folder, '".']);
 end
