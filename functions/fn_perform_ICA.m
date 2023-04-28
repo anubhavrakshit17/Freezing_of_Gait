@@ -1,4 +1,4 @@
-function [icaweights,icasphere,icaact] = fn_perform_ICA(filename)
+function [icaweights,icasphere,icawinv,icaact] = fn_perform_ICA(filename,EEG_signal)
 % This function performs ICA on an EEG signal stored in a .mat file using the pop_runica() function from EEGlab.
 %
 % Inputs:
@@ -10,7 +10,6 @@ function [icaweights,icasphere,icaact] = fn_perform_ICA(filename)
 
 
 load(filename);
-EEG_signal = EEG_File.EEG_signal;
 
 ica_folder = 'ICA_performed_dataset';
 
@@ -23,16 +22,19 @@ end
 
 icaweights_filename = [char(filename), '_icaweights.mat'];
 icasphere_filename= [char(filename), '_icasphere.mat'];
+icawinv_filename = [char(filename), '_icawinv.mat'];
 icaact_filename = [char(filename), '_icaact.mat'];
 
 % Check if the file already exists
 if exist(fullfile(ica_folder, icaweights_filename), 'file')  && ...
     exist (fullfile(ica_folder, icasphere_filename), 'file')  && ...
+    exist(fullfile(ica_folder, icawinv_filename), 'file')
     exist(fullfile(ica_folder, icaact_filename), 'file')
     disp(['The ICA files "', icaact_filename, '" already exists in "', ica_folder, '".']);
     %eeglab;
 icaweights = load(fullfile(ica_folder,icaweights_filename),'-mat');
 icasphere =    load(fullfile(icasphere_filename),'-mat');
+icawinv=   load(fullfile(ica_folder,icawinv_filename),'-mat');
 icaact=   load(fullfile(ica_folder,icaact_filename),'-mat');
 
 
@@ -55,12 +57,15 @@ else
     icaweights = EEG.icaweights;
     icasphere = EEG.icasphere;
     % Extract ICA-transformed EEG data
+    icawinv = EEG.icawinv;
     icaact = EEG.icaweights * EEG.icasphere * EEG.data;
     
     save(fullfile(ica_folder, icaweights_filename), 'icaweights');
     save(fullfile(ica_folder, icasphere_filename), 'icasphere');
+    save(fullfile(ica_folder, icawinv_filename), 'icawinv');
     save(fullfile(ica_folder, icaact_filename), 'icaact');
-    disp(['The icaact file "', icaweights_filename, '" has been saved to "', ica_folder, '".']);
-    disp(['The icaact file "', icasphere_filename, '" has been saved to "', ica_folder, '".']);
+    disp(['The icaweignts file "', icaweights_filename, '" has been saved to "', ica_folder, '".']);
+    disp(['The icasphere file "', icasphere_filename, '" has been saved to "', ica_folder, '".']);
+    disp(['The icawinv file "', icawinv_filename, '" has been saved to "', ica_folder, '".']);
     disp(['The icaact file "', icaact_filename, '" has been saved to "', ica_folder, '".']);
 end
