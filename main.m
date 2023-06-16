@@ -1,17 +1,14 @@
-%% Import the data
-close 
-clear
-fn_addpath()
-EEG = fn_import('PD09_48.set');
+clc
+clear all
+close all
 
-%% Import the events
-rf_gait = 'rf.txt';
-lf_gait = 'lf.txt';
-EEG = fn_event_maker(EEG,rf_gait,lf_gait);
-%%
-close 
-clear
-fn_addpath()
-EEG = fn_import('PD09_48_event.set');
-%% 
-fn_save_gait_events_file()
+%%  Add Events and Channel locations
+
+EEG = fn_add_events_and_chanlocs('yo.set'); 
+
+%% TASK 2 : Visualize the raw signal PSD
+run("script01_visualize_raw_signal.m");
+
+%% TASK 3 : 
+
+ %%
